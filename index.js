@@ -31,7 +31,7 @@ const spanY = (n) => { return Math.floor(n * height / 12); }
 const balls = [];
 // ボールの大きさ
 const sizes = [];
-let size = spanY(1);
+let size = spanY(3);
 for (let i = 1; i <= 10; i++) {
   const r = Math.sqrt(size);
   const color = `hsl(${i / 10 * 360},90%,50%)`
