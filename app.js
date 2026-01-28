@@ -52,6 +52,13 @@ phina.define('GameScene', {
             height: self.height,
         }).addChildTo(self).setPosition(self.gridX.center(), self.gridY.center());
 
+        const deadLine = RectangleShape({
+            fill: "green",
+            strokeWidth: 0,
+            width: self.width,
+            height: 10,
+        }).setPosition(self.gridX.center(), self.gridY.center(7)).addChildTo(self);
+
         createEnemy = function() {
             let enemy;
             let hp;
@@ -73,7 +80,7 @@ phina.define('GameScene', {
         createEnemy();
 
         const pointLabel = LabelArea({
-            text: "得点: 0",
+            text: "SCORE: 0",
             fontSize: 32,
             fill: "white",
             height: 30,
@@ -84,7 +91,7 @@ phina.define('GameScene', {
         }).addChildTo(self.baseLayer);
 
         function updatePointLabel() {
-            pointLabel.text = "得点: " + self.points;
+            pointLabel.text = "SCORE: " + self.points;
         }
 
 
@@ -506,7 +513,7 @@ phina.define('GameScene', {
                 width: 630,
                 height: 630,
                 strokeWidth: 0,
-            }).addChildTo(self.baseLayer).setPosition(self.gridX.center(), self.gridY.center(2));
+            }).addChildTo(self.baseLayer).setPosition(self.gridX.center(), self.gridY.center());
             const grid = Grid({width: self.ban.width - ((19 - size) * 6 + 50), columns: size - 1});
 
             const floor = Math.floor(size / 2);
@@ -636,7 +643,9 @@ phina.define('GameScene', {
                 fill: "red",
                 radius: self.banLayer.grid.unitWidth / 2 - 2,
                 strokeWidth: 0,
-            }).addChildTo(self.animationLayer).setPosition(self.banLayer.grid.span(fromX - floor) - self.banLayer.grid.unitWidth, self.banLayer.grid.span(fromY - floor) + 54);
+            }).addChildTo(self.animationLayer).setPosition(
+                self.banLayer.grid.span(fromX - floor) - self.banLayer.grid.unitWidth,
+                self.banLayer.grid.span(fromY - floor) - 62);
 
             // 玉の飛び先は、Y座標が一番大きいenemyの位置
             const topEnemy = getTopEnemy();
