@@ -76,7 +76,7 @@ phina.define('GameScene', {
             const enemy = Sprite("enemy" + hp).addChildTo(self.animationLayer);
             const xrange = self.animationLayer.width / 2 - enemy.width / 2;
             const x = Math.floor(Math.random() * xrange) - xrange / 2;
-            enemy.setPosition(x, -1 * self.animationLayer.height / 2);
+            enemy.setPosition(x, -1 * self.animationLayer.height / 2 + enemy.height);
             self.enemies.push({splite:enemy, hp: hp});
         }
         createEnemy();
@@ -739,8 +739,10 @@ phina.define('GameScene', {
                     damageLabel.show();
                     // topEnemyを削除する
                     if (removeTopEnemy(damage)) {
-                        // 新しい敵を作る
-                        createEnemy();
+                        // 少し待ってから新しい敵を作る
+                        setTimeout(() => {
+                            self.createEnemy();
+                        }, 500);
                     }
                 })
                 .by({y: -50}, 500, "easeOutCirc")
@@ -773,7 +775,7 @@ phina.define('GameScene', {
             if (index > -1) {
                 self.enemies.splice(index, 1);
                 topEnemy.splite.remove();
-                self.points += lastDamage;
+                self.points += lastDamage * 10;
                 killCount += 1;
                 updatePointLabel();
 
@@ -798,6 +800,7 @@ phina.define('GameScene', {
         const self = this;
         this.timer += 1;
         if (this.timer % 5 !== 0) {
+        // if (this.timer % 1 !== 0) {
             return;
         }
 
@@ -815,8 +818,10 @@ phina.define('GameScene', {
             if (enemy.splite.hitTestElement(self.deadLine)) {
                 self.deadLine.fill = "red";
                 self.gameOver = true;
+                // 碁盤を半透明にする
+                self.ban.alpha = 0.2;
                 setTimeout(() => {
-                    App.pushScene(GameOverScene());
+                    App.pushScene(GameOverScene({score: self.points}));
                 }, 1);
                 self.one("resume", () => {
                     self.exit("TitleScene");
@@ -843,13 +848,47 @@ phina.define('GameOverScene', {
             fontWeight: "bold",
             stroke: "black",
             strokeWidth: 8,
-        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-5));
 
-        setTimeout(() => {
-            self.on("pointstart", function() {
-                self.exit("TitleScene");
-            });
-        }, 3000);
+        const hightScore = localStorage.getItem("invader_high_score", Math.max(param.score, localStorage.getItem("invader_high_score") || 0));
+
+        if (param.score > hightScore) {
+            localStorage.setItem("invader_high_score", param.score);
+            Label({
+                text: "HIGHT SCORE !!",
+                fontSize: 60,
+                fill: "red",
+                fontWeight: "bold",
+                stroke: "white",
+                strokeWidth: 12,
+            }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-2.5));
+            Label({
+                text: param.score,
+                fontSize: 120,
+                fill: "red",
+                fontWeight: "bold",
+                stroke: "white",
+                strokeWidth: 12,
+            }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-1));
+        }
+
+        // 戻るボタン
+        const backButton = RectangleShape({
+            width: 200,
+            height: 60,
+            fill: "white",
+            strokeWidth: 0,
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(6));
+        Label({
+            text: "BACK",
+            fontSize: 40,
+            fill: "black",
+            fontWeight: "bold",
+        }).addChildTo(backButton).setPosition(0, 0);
+        backButton.setInteractive(true);
+        backButton.on("pointstart", function() {
+            self.exit("TitleScene");
+        });
 
     },
 });
@@ -868,8 +907,42 @@ phina.define('TitleScene', {
             text: "囲碁\nインベーダー",
             fill: "white",
             fontWeight: 800,
-            fontSize: 50,
-        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(0.8));
+            fontSize: 80,
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-3));
+
+        // ハイスコア表示
+        const hightScore = localStorage.getItem("invader_high_score");
+        if (hightScore > 0) {
+            Label({
+                text: "ハイスコア\n" + hightScore,
+                fill: "white",    
+                fontWeight: 800,
+                fontSize: 40,
+            }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(1));
+        }
+
+        // ヒント表示
+        const hints = [
+            "碁石を一度にたくさん消すと高得点だ！",
+            "黒石と白石をバランスよく消そう！",
+            "緑色の敵は、碁石を同時に２つ以上消せば倒せるぞ！",
+            "黄色の敵は、碁石を同時に３つ以上消せば倒せるぞ！",
+            "ウッテガエシで盤面をリセットできる！",
+            "コウを利用すると有利に戦えるぞ！",
+        ];
+        // 表示するヒントをランダムに決定
+        const hint = hightScore === null
+            ? "侵略者が緑ラインまで到達する前に、碁石を消して攻撃しよう！"
+            : hints[Math.floor(Math.random() * hints.length)];
+        LabelArea({
+            text: hint,
+            fontSize: 24,
+            fill: "white",
+            fontWeight: "bold",
+            stroke: "black",
+            strokeWidth: 8,
+            width: this.gridX.width * 0.7,
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(6));
 
         this.on("pointstart", function() {
             self.exit("GameScene");
