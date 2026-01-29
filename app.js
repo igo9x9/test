@@ -46,6 +46,27 @@ phina.define('GameScene', {
             height: this.height,
         }).addChildTo(this).setPosition(0, 0);
 
+        self.exitButton = RectangleShape({
+            fill: "transparent",
+            strokeWidth: 0,
+            width: this.width,
+            height: 300,
+        }).addChildTo(this).setPosition(this.width / 2, 200);;
+        self.exitButton.setInteractive(true);
+        self.exitButton.on("pointstart", (e) => {
+            if (confirm("あきらめますか？")) {
+                self.gameOver = true;
+                // 碁盤を半透明にする
+                self.ban.alpha = 0.2;
+                setTimeout(() => {
+                    App.pushScene(GameOverScene({score: self.points}));
+                }, 1);
+                self.one("resume", () => {
+                    self.exit("TitleScene");
+                });
+            }
+        });
+
         createGoban(BOARD_SIZE);
 
         createTapArea();
