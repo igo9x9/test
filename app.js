@@ -1029,10 +1029,10 @@ phina.define('GameOverScene', {
             strokeWidth: 8,
         }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-5));
 
-        const hightScore = localStorage.getItem("invader_high_score", Math.max(param.score, localStorage.getItem("invader_high_score") || 0));
+        const hightScore = localStorage.getItem("invader2_high_score", Math.max(param.score, localStorage.getItem("invader2_high_score") || 0));
 
         if (param.score > hightScore) {
-            localStorage.setItem("invader_high_score", param.score);
+            localStorage.setItem("invader2_high_score", param.score);
             Label({
                 text: "HIGHT SCORE !!",
                 fontSize: 60,
@@ -1083,14 +1083,23 @@ phina.define('TitleScene', {
         this.backgroundColor = "black";
 
         Label({
+            text: "２",
+            fill: "green",
+            fontWeight: 800,
+            fontSize: 400,
+        }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-3));
+
+        Label({
             text: "囲碁\nインベーダー",
             fill: "white",
             fontWeight: 800,
             fontSize: 80,
+            strokeWidth: 8,
+            stroke: "black",
         }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center(-3));
 
         // ハイスコア表示
-        const hightScore = localStorage.getItem("invader_high_score");
+        const hightScore = localStorage.getItem("invader2_high_score");
         if (hightScore > 0) {
             Label({
                 text: "ハイスコア\n" + hightScore,
@@ -1107,10 +1116,11 @@ phina.define('TitleScene', {
             "緑色の敵は、碁石を同時に２つ以上消せば倒せるぞ！",
             "黄色の敵は、碁石を同時に３つ以上消せば倒せるぞ！",
             "コウを利用する方法もあるぞ！",
+            "UFOはすぐに倒さないほうがいいかも！",
         ];
         // 表示するヒントをランダムに決定
         const hint = hightScore === null
-            ? "侵略者が緑ラインまで到達する前に、碁石を消して攻撃しよう！"
+            ? "侵略者が緑ラインまで到達するまでに、碁石を消してやっつけよう！"
             : hints[Math.floor(Math.random() * hints.length)];
         LabelArea({
             text: hint,
